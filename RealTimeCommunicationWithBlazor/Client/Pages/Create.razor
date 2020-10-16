@@ -1,0 +1,69 @@
+﻿@page "/createblog"
+@inject IJSRuntime javascriptRunTime
+@inject HttpClient httpClient
+@inject NavigationManager navigationManager
+
+
+
+<div class="container">
+    <h1 class="display-4"><strong>Write a blog..</strong></h1>
+    <hr />
+    <div class="form-group">
+        <label for="blogTitle"><strong>Title</strong></label>
+        <input type="text" class="form-control" id="blogTitle" @bind-value="Title" @bind-value:event="onchange" placeholder="Title of the blog..">
+    </div>
+    <div class="form-group">
+
+        <label for="blogTitle"><strong>Content</strong></label>
+        <div class="mt-1" spellcheck="true">
+            <RealTimeCommunicationWithBlazor.Client.Reusable_Components.ToolBar />
+            <hr />
+            <div contenteditable="true" id="dvBlog"  class="mt-1 jumbotron form-control">
+
+            </div>
+        </div>
+        <button type="button" class="mt-1 btn btn-block btn-outline-myfavcolor1" @onclick="SaveBlog">Save</button>
+    </div>
+</div>
+
+
+
+
+@code {
+
+
+    private string BlogContent { get; set; }
+    private string BlogText { get; set; }
+    private string Title { get; set; }
+
+    internal class BlogData
+    {
+
+        public string Content { get; set; }
+        public string Text { get; set; }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await javascriptRunTime.InvokeVoidAsync("formatTextEditor");
+
+        }
+    }
+
+    async void  SaveBlog()
+    {
+        Console.WriteLine("Getting Blog Content ");
+
+        var blogC = await javascriptRunTime.InvokeAsync<BlogData>("getBlogContent");
+
+        BlogContent = blogC.Content;
+
+        Console.WriteLine(BlogContent);
+
+        var newBlog = new RealTimeCommunicationWithBlazor.Shared.Blog { Content = BlogContent, Title = Title, CreatedAt = new DateTime() };
+        var response = await httpClient.PostAsJsonAsync("api/Blogs", newBlog);
+        navigationManager.NavigateTo("/blogs");
+    }
+
+}

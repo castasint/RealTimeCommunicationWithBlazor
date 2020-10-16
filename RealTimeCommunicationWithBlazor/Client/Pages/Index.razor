@@ -1,0 +1,74 @@
+﻿@page "/"
+@page "/blogs"
+@inject HttpClient httpClient
+@using RealTimeCommunicationWithBlazor.Shared
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager navigationManager
+
+
+@if (Blogs == null)
+{
+    <RealTimeCommunicationWithBlazor.Client.Reusable_Components.Spinner  />
+}
+else if(Blogs.Length ==0)
+{
+
+    <h1>No Blogs Found</h1>
+}
+else
+{
+    <div>
+        @foreach (var blog in Blogs)
+        {
+      
+         <DevBlog blog="@blog"/>
+
+          
+        }
+    </div>
+}
+@code {
+
+
+    private Blog[] Blogs;
+    private  HubConnection hubConnection;
+    protected async override Task OnInitializedAsync()
+    {
+        hubConnection = new Microsoft.AspNetCore.SignalR.Client.HubConnectionBuilder()
+            .WithUrl(navigationManager.ToAbsoluteUri("/bloghub"))
+            .Build();
+        hubConnection.On("NewBlogAddition", () => {
+            Console.WriteLine("New Blog Has Been Added...");
+            RetreiveAllBlogs();
+          
+        });
+        await hubConnection.StartAsync();
+
+        await  GetBlogs();
+
+
+    }
+
+
+    private void RetreiveAllBlogs()
+    {
+
+        Console.WriteLine("Retreive All Blogs");
+
+        Task.Run(async () => {
+
+            await GetBlogs();
+            StateHasChanged();
+
+        });
+    }
+
+    private async Task  GetBlogs()
+    {
+        Blogs = await httpClient.GetFromJsonAsync<Blog[]>("api/blogs");
+
+    }
+
+
+
+}

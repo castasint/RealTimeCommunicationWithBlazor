@@ -1,0 +1,23 @@
+﻿
+
+
+<div class="card mt-2 highlight-left">
+    <div class="card-body">
+        <div class="p-1 highlight-bottom"> <h2 class="card-title text-mycolor3">@blog.Title</h2></div>
+        <div>
+            <div class="p-2">
+                <div class="card-text"> @((MarkupString)@blog.Content)</div>
+                <a class="btn btn-outline-myfavcolor1 mt-2 btn-sm " href="/blog/@blog.BlogId" role="button">Read More..</a>
+            </div>
+        </div>
+       
+       
+
+    </div>
+</div>
+@code {
+
+    [Parameter]
+
+    public RealTimeCommunicationWithBlazor.Shared.Blog blog { get; set; }
+}
